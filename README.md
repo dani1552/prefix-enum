@@ -12,8 +12,8 @@
 
 실제 서비스 환경에서 다양한 enum을 통합하여 사용할 때 다음 문제가 발생합니다:
 
-[[Next.js] 중복 ENUM 값 충돌로 인해 발생한 키워드 매핑 오류 해결하기](https://dani1552.tistory.com/84)
-[[Next.js] ENUM 키워드 매핑 실패로 인해 발생한 한글 변환 오류 해결하기](https://dani1552.tistory.com/85)
+[[Next.js] 중복 ENUM 값 충돌로 인해 발생한 키워드 매핑 오류 해결하기](https://dani1552.tistory.com/84) <br />
+[[Next.js] ENUM 키워드 매핑 실패로 인해 발생한 한글 변환 오류 해결하기](https://dani1552.tistory.com/85) <br />
 
 - 서로 다른 카테고리에서 동일한 키(`TRYING_TO_QUIT`) 사용으로 인한 충돌
 - API 응답(`preferredPeople`)과 enum 키(`PREFERRED_PEOPLE_RELIABLE`) 포맷 불일치
