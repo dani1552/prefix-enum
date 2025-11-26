@@ -70,4 +70,98 @@ describe("buildKeywordMap", () => {
     expect(combined["FIRST_ITEM"]?.label).toBe("First Item");
     expect(combined["SECOND_ITEM"]?.label).toBe("Second Item");
   });
+
+  it("enumGroups 객체를 직접 받아서 자동으로 prefixEnum을 실행한다", () => {
+    const SmokingEnum = {
+      TRYING_TO_QUIT: "금연중",
+      NEVER: "비흡연",
+    };
+
+    const DrinkingEnum = {
+      TRYING_TO_QUIT: "금주중",
+      NEVER: "비음주",
+    };
+
+    const map = buildKeywordMap({
+      SMOKING: SmokingEnum,
+      DRINKING: DrinkingEnum,
+    });
+
+    expect(map["SMOKING_TRYING_TO_QUIT"]?.label).toBe("금연중");
+    expect(map["SMOKING_NEVER"]?.label).toBe("비흡연");
+    expect(map["DRINKING_TRYING_TO_QUIT"]?.label).toBe("금주중");
+    expect(map["DRINKING_NEVER"]?.label).toBe("비음주");
+    expect(Object.keys(map)).toHaveLength(4);
+  });
+
+  it("enumGroups 객체에서도 중복 키를 방지한다", () => {
+    const RoleEnum1 = {
+      admin: "Admin",
+    };
+
+    const RoleEnum2 = {
+      admin: "Admin",
+    };
+
+    expect(() => {
+      buildKeywordMap({
+        role: RoleEnum1,
+        role2: RoleEnum2,
+      });
+      // role과 role2가 같은 카테고리명으로 정규화되면 중복 발생
+      // 하지만 실제로는 다른 카테고리명이므로 다른 키가 생성됨
+      // 실제 중복은 같은 카테고리에서 같은 값이 있을 때 발생
+    }).not.toThrow();
+
+    // 실제 중복 케이스: 같은 카테고리로 두 번 prefixEnum 호출 후 병합
+    const result1 = prefixEnum("role", RoleEnum1);
+    const result2 = prefixEnum("role", RoleEnum2);
+
+    expect(() => {
+      buildKeywordMap([result1, result2]);
+    }).toThrow("Keyword key already exists in map: ROLE_ADMIN");
+  });
+
+  it("enumGroups 객체에 options를 전달할 수 있다", () => {
+    const TestEnum = {
+      test_key: {
+        // 라벨을 명시하지 않아 formatLabel이 사용됨
+      },
+    };
+
+    const map = buildKeywordMap(
+      {
+        test: TestEnum,
+      },
+      {
+        formatLabel: (value) => `Custom: ${value}`,
+      },
+    );
+
+    expect(map["TEST_TEST_KEY"]?.label).toBe("Custom: TEST_KEY");
+  });
+
+  it("enumGroups 객체와 배열 형태를 모두 지원한다", () => {
+    const enum1 = prefixEnum("category1", {
+      item1: "Item 1",
+    });
+
+    const enum2 = prefixEnum("category2", {
+      item2: "Item 2",
+    });
+
+    // 배열 형태
+    const map1 = buildKeywordMap([enum1, enum2]);
+
+    // 객체 형태
+    const map2 = buildKeywordMap({
+      category1: { item1: "Item 1" },
+      category2: { item2: "Item 2" },
+    });
+
+    expect(map1["CATEGORY1_ITEM1"]?.label).toBe("Item 1");
+    expect(map1["CATEGORY2_ITEM2"]?.label).toBe("Item 2");
+    expect(map2["CATEGORY1_ITEM1"]?.label).toBe("Item 1");
+    expect(map2["CATEGORY2_ITEM2"]?.label).toBe("Item 2");
+  });
 });

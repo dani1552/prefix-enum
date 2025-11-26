@@ -116,8 +116,39 @@ export const prefixEnum = <const TName extends string>(
   return { category: normalizedCategory, keys, labelMap, entries, map };
 };
 
-export const buildKeywordMap = (sources: Array<PrefixEnumResult | KeywordMap>): KeywordMap =>
-  sources.reduce<KeywordMap>((acc, source) => {
+/**
+ * 여러 enum 그룹을 하나의 매핑 테이블로 자동 조립
+ * @param enumGroups - 카테고리명을 키로, enum 정의를 값으로 가지는 객체
+ * @returns 병합된 KeywordMap
+ */
+export function buildKeywordMap<T extends Record<string, Record<string, KeywordDefinition>>>(
+  enumGroups: T,
+  options?: PrefixEnumOptions,
+): KeywordMap;
+
+/**
+ * 여러 PrefixEnumResult 또는 KeywordMap을 하나의 매핑 테이블로 병합
+ * @param sources - PrefixEnumResult 또는 KeywordMap 배열
+ * @returns 병합된 KeywordMap
+ */
+export function buildKeywordMap(sources: Array<PrefixEnumResult | KeywordMap>): KeywordMap;
+
+export function buildKeywordMap<T extends Record<string, Record<string, KeywordDefinition>>>(
+  sourcesOrGroups: Array<PrefixEnumResult | KeywordMap> | T,
+  options?: PrefixEnumOptions,
+): KeywordMap {
+  // enumGroups 객체인 경우
+  if (!Array.isArray(sourcesOrGroups)) {
+    const enumGroups = sourcesOrGroups;
+    const results: PrefixEnumResult[] = Object.entries(enumGroups).map(([category, definitions]) =>
+      prefixEnum(category, definitions, options ?? {}),
+    );
+    return buildKeywordMap(results);
+  }
+
+  // 기존 로직: PrefixEnumResult 또는 KeywordMap 배열
+  const sources = sourcesOrGroups;
+  return sources.reduce<KeywordMap>((acc, source) => {
     const nextMap = "map" in source ? source.map : source;
     for (const [key, entry] of Object.entries(nextMap)) {
       if (acc[key]) {
@@ -127,9 +158,15 @@ export const buildKeywordMap = (sources: Array<PrefixEnumResult | KeywordMap>): 
     }
     return acc;
   }, {});
+}
 
 export interface GetKeywordLabelOptions {
+  /** 매핑 실패 시 사용할 텍스트 */
   fallback?: string;
+  /** true면 fallback 없이 에러 throw */
+  strict?: boolean;
+  /** 매핑 실패 시 console.warn 표시 */
+  debug?: boolean;
 }
 
 export const getKeywordLabel = (
@@ -139,5 +176,25 @@ export const getKeywordLabel = (
 ): string | undefined => {
   const map: KeywordMap =
     "map" in source ? (source as PrefixEnumResult).map : (source as KeywordMap);
-  return map[key]?.label ?? options.fallback;
+  const entry = map[key];
+
+  if (entry) {
+    return entry.label;
+  }
+
+  // 매핑 실패 처리
+  if (options.debug) {
+    console.warn(`[prefix-enum] Keyword label not found for key: "${key}"`);
+  }
+
+  // fallback이 있으면 에러를 throw하지 않음
+  if (options.fallback !== undefined) {
+    return options.fallback;
+  }
+
+  if (options.strict) {
+    throw new Error(`Keyword label not found for key: "${key}"`);
+  }
+
+  return undefined;
 };
