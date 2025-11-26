@@ -1,6 +1,6 @@
 {
   "name": "prefix-enum",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "카테고리별로 prefix를 붙여 고유한 enum 키를 생성하고 관리하는 TypeScript 라이브러리. 포맷 불일치와 중복 값 충돌 문제를 해결합니다.",
   "type": "module",
   "main": "dist/index.cjs",
