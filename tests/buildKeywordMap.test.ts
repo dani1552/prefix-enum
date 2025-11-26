@@ -164,4 +164,59 @@ describe("buildKeywordMap", () => {
     expect(map2["CATEGORY1_ITEM1"]?.label).toBe("Item 1");
     expect(map2["CATEGORY2_ITEM2"]?.label).toBe("Item 2");
   });
+
+  describe("TypeScript enum 지원", () => {
+    enum SmokingEnum {
+      TRYING_TO_QUIT = "TRYING_TO_QUIT",
+      NEVER = "NEVER",
+    }
+
+    enum DrinkingEnum {
+      TRYING_TO_QUIT = "TRYING_TO_QUIT",
+      NEVER = "NEVER",
+    }
+
+    it("enumGroups 객체에 TypeScript enum을 직접 전달할 수 있다", () => {
+      const map = buildKeywordMap({
+        SMOKING: SmokingEnum,
+        DRINKING: DrinkingEnum,
+      });
+
+      // enum 값이 라벨로 사용됨
+      expect(map["SMOKING_TRYING_TO_QUIT"]?.label).toBe("TRYING_TO_QUIT");
+      expect(map["SMOKING_NEVER"]?.label).toBe("NEVER");
+      expect(map["DRINKING_TRYING_TO_QUIT"]?.label).toBe("TRYING_TO_QUIT");
+      expect(map["DRINKING_NEVER"]?.label).toBe("NEVER");
+      expect(Object.keys(map)).toHaveLength(4);
+    });
+
+    it("enumGroups 객체에 enum과 일반 객체를 함께 사용할 수 있다", () => {
+      const map = buildKeywordMap({
+        SMOKING: SmokingEnum,
+        STATUS: {
+          active: "Active",
+          inactive: "Inactive",
+        },
+      });
+
+      // enum 값이 라벨로 사용됨
+      expect(map["SMOKING_TRYING_TO_QUIT"]?.label).toBe("TRYING_TO_QUIT");
+      expect(map["STATUS_ACTIVE"]?.label).toBe("Active");
+      expect(map["STATUS_INACTIVE"]?.label).toBe("Inactive");
+    });
+
+    it("enumGroups 객체에 enum과 options를 함께 전달할 수 있다", () => {
+      const map = buildKeywordMap(
+        {
+          TEST: SmokingEnum,
+        },
+        {
+          formatLabel: (value) => `Custom: ${value}`,
+        },
+      );
+
+      expect(map["TEST_TRYING_TO_QUIT"]?.label).toBe("Custom: TRYING_TO_QUIT");
+      expect(map["TEST_NEVER"]?.label).toBe("Custom: NEVER");
+    });
+  });
 });

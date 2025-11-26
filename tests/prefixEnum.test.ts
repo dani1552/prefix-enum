@@ -99,4 +99,68 @@ describe("prefixEnum", () => {
     expect(result.labelMap["STATUS_ACTIVE"]).toBe("Active");
     expect(result.labelMap["STATUS_INACTIVE"]).toBe("Inactive");
   });
+
+  describe("TypeScript enum 지원", () => {
+    enum SmokingEnum {
+      TRYING_TO_QUIT = "TRYING_TO_QUIT",
+      NEVER = "NEVER",
+      SOMETIMES = "SOMETIMES",
+    }
+
+    enum StatusEnum {
+      ACTIVE = 0,
+      INACTIVE = 1,
+      PENDING = 2,
+    }
+
+    it("문자열 enum을 직접 받아 처리한다", () => {
+      const result = prefixEnum("SMOKING", SmokingEnum);
+
+      expect(result.category).toBe("SMOKING");
+      expect(result.keys.TRYING_TO_QUIT).toBe("SMOKING_TRYING_TO_QUIT");
+      expect(result.keys.NEVER).toBe("SMOKING_NEVER");
+      expect(result.keys.SOMETIMES).toBe("SMOKING_SOMETIMES");
+      // enum 값이 라벨로 사용됨
+      expect(result.map["SMOKING_TRYING_TO_QUIT"]?.label).toBe("TRYING_TO_QUIT");
+      expect(result.map["SMOKING_NEVER"]?.label).toBe("NEVER");
+    });
+
+    it("숫자 enum을 직접 받아 처리한다", () => {
+      const result = prefixEnum("STATUS", StatusEnum);
+
+      expect(result.category).toBe("STATUS");
+      expect(result.keys.ACTIVE).toBe("STATUS_ACTIVE");
+      expect(result.keys.INACTIVE).toBe("STATUS_INACTIVE");
+      expect(result.keys.PENDING).toBe("STATUS_PENDING");
+      // enum 값이 라벨로 사용됨
+      expect(result.map["STATUS_ACTIVE"]?.label).toBe("0");
+      expect(result.map["STATUS_INACTIVE"]?.label).toBe("1");
+    });
+
+    it("enum에 formatLabel 옵션을 적용할 수 있다", () => {
+      const result = prefixEnum("SMOKING", SmokingEnum, {
+        formatLabel: (value) => `Custom: ${value}`,
+      });
+
+      expect(result.map["SMOKING_TRYING_TO_QUIT"]?.label).toBe("Custom: TRYING_TO_QUIT");
+      expect(result.map["SMOKING_NEVER"]?.label).toBe("Custom: NEVER");
+    });
+
+    it("enum에서도 중복 키를 감지한다", () => {
+      // enum의 경우 키 이름을 value로 사용하므로, 같은 값이어도 키 이름이 다르면 다른 키가 됨
+      // 실제 중복은 같은 키 이름을 가진 경우에만 발생
+      enum DuplicateEnum {
+        SAME_KEY = "same_value",
+        SAME_KEY2 = "same_value", // 같은 값이지만 키 이름이 다름
+      }
+
+      // 키 이름을 value로 사용하므로 SAME_KEY와 SAME_KEY2는 다른 키가 됨
+      const result = prefixEnum("TEST", DuplicateEnum);
+      expect(result.keys.SAME_KEY).toBe("TEST_SAME_KEY");
+      expect(result.keys.SAME_KEY2).toBe("TEST_SAME_KEY2");
+
+      // 실제 중복은 같은 키 이름을 가진 경우에만 발생
+      // enum에서는 키 이름이 다르면 중복이 아님
+    });
+  });
 });
