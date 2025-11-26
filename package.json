@@ -1,7 +1,7 @@
 {
   "name": "prefix-enum",
   "version": "1.0.0",
-  "description": "",
+  "description": "카테고리별로 prefix를 붙여 고유한 enum 키를 생성하고 관리하는 TypeScript 라이브러리. 포맷 불일치와 중복 값 충돌 문제를 해결합니다.",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -23,9 +23,28 @@
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "pnpm lint -- --fix"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "enum",
+    "typescript",
+    "prefix",
+    "mapping",
+    "keyword",
+    "category",
+    "normalize",
+    "camelcase",
+    "snake-case",
+    "type-safe"
+  ],
+  "author": "dani1552",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dani1552/prefix-enum.git"
+  },
+  "homepage": "https://github.com/dani1552/prefix-enum#readme",
+  "bugs": {
+    "url": "https://github.com/dani1552/prefix-enum/issues"
+  },
   "packageManager": "pnpm@10.10.0",
   "devDependencies": {
     "@types/node": "^24.10.1",
