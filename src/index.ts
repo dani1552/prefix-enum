@@ -3,6 +3,7 @@ export {
   buildKeywordKey,
   buildKeywordMap,
   getKeywordLabel,
+  enumToDefinitions,
 } from "./core/prefixEnum.js";
 
 export type {

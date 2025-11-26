@@ -59,26 +59,111 @@ export const buildKeywordKey = (category: string, value: string): string => {
   return `${normalizedCategory}_${normalizedValue}`;
 };
 
-export const prefixEnum = <const TName extends string>(
+/**
+ * TypeScript enum을 KeywordDefinition 객체로 변환
+ * @param enumObject - TypeScript enum 객체
+ * @returns enum의 키-값 쌍을 KeywordDefinition 형태로 변환한 객체
+ */
+export const enumToDefinitions = <T extends Record<string, string | number>>(
+  enumObject: T,
+): Record<string, KeywordDefinition> => {
+  const result: Record<string, KeywordDefinition> = {};
+
+  // enum의 모든 키를 순회
+  for (const key in enumObject) {
+    // 숫자 enum의 역방향 매핑 제외 (값이 숫자인 키는 제외)
+    if (isNaN(Number(key))) {
+      const value = enumObject[key];
+      if (typeof value === "string" || typeof value === "number") {
+        // enum 값을 문자열로 변환하여 라벨로 사용
+        // formatLabel을 적용하려면 빈 객체로 설정하되, value는 키 이름 사용
+        result[key] = String(value);
+      }
+    }
+  }
+
+  return result;
+};
+
+/**
+ * TypeScript enum을 직접 받아 prefixEnum 실행
+ * @param category - 카테고리명
+ * @param enumObject - TypeScript enum 객체
+ * @param options - 옵션
+ * @returns PrefixEnumResult
+ */
+export function prefixEnum<T extends Record<string, string | number>>(
+  category: string,
+  enumObject: T,
+  options?: PrefixEnumOptions,
+): PrefixEnumResult<string>;
+
+/**
+ * 객체 형태의 정의를 받아 prefixEnum 실행
+ * @param category - 카테고리명
+ * @param definitions - KeywordDefinition 객체
+ * @param options - 옵션
+ * @returns PrefixEnumResult
+ */
+export function prefixEnum<const TName extends string>(
   category: string,
   definitions: Record<TName, KeywordDefinition>,
+  options?: PrefixEnumOptions,
+): PrefixEnumResult<TName>;
+
+export function prefixEnum<const TName extends string>(
+  category: string,
+  definitionsOrEnum: Record<TName, KeywordDefinition> | Record<string, string | number>,
   options: PrefixEnumOptions = {},
-): PrefixEnumResult<TName> => {
+): PrefixEnumResult<TName> {
+  // enum인지 확인: 모든 값이 string 또는 number인 경우 enum으로 간주
+  let definitions: Record<string, KeywordDefinition>;
+  let isEnumType = false;
+
+  if (Object.keys(definitionsOrEnum).length > 0) {
+    const isEnum = Object.values(definitionsOrEnum).every(
+      (v) => typeof v === "string" || typeof v === "number",
+    );
+
+    if (isEnum) {
+      // enum으로 추정되는 경우 변환
+      definitions = enumToDefinitions(definitionsOrEnum as Record<string, string | number>);
+      isEnumType = true;
+    } else {
+      definitions = definitionsOrEnum as Record<TName, KeywordDefinition>;
+    }
+  } else {
+    definitions = definitionsOrEnum as Record<TName, KeywordDefinition>;
+  }
+
   const normalizedCategory = normalizeCategory(category);
   const formatLabel = options.formatLabel ?? defaultFormatLabel;
   const seenKeys = new Set<string>();
 
-  const entries = (Object.entries(definitions) as Array<[TName, KeywordDefinition]>).map(
+  const entries = (Object.entries(definitions) as Array<[string, KeywordDefinition]>).map(
     ([name, definition]) => {
-      const normalizedValue = normalizeKeywordValue(
-        typeof definition === "string" ? name : (definition.value ?? name),
-      );
+      // enum인 경우: 키 이름을 value로 사용
+      // 일반 객체인 경우: definition이 string이면 name 사용, 객체면 value 또는 name 사용
+      const valueToNormalize = isEnumType
+        ? name
+        : typeof definition === "string"
+          ? name
+          : (definition.value ?? name);
+
+      const normalizedValue = normalizeKeywordValue(valueToNormalize);
 
       const key = buildKeywordKey(normalizedCategory, normalizedValue);
       ensureUnique(key, seenKeys);
 
-      const label =
-        typeof definition === "string"
+      // enum인 경우: formatLabel 옵션이 있으면 적용, 없으면 enum 값을 라벨로 사용
+      // 일반 객체인 경우: definition이 string이면 그대로, 객체면 label 또는 formatLabel
+      const label = isEnumType
+        ? options.formatLabel
+          ? formatLabel(normalizedValue, name)
+          : typeof definition === "string"
+            ? definition
+            : formatLabel(normalizedValue, name)
+        : typeof definition === "string"
           ? definition
           : (definition.label ?? formatLabel(normalizedValue, name));
 
@@ -94,7 +179,7 @@ export const prefixEnum = <const TName extends string>(
 
   const keys = entries.reduce(
     (acc, entry) => {
-      acc[entry.name] = entry.key;
+      (acc as Record<string, string>)[entry.name] = entry.key;
       return acc;
     },
     {} as Record<TName, string>,
@@ -113,8 +198,14 @@ export const prefixEnum = <const TName extends string>(
     return acc;
   }, {} as KeywordMap);
 
-  return { category: normalizedCategory, keys, labelMap, entries, map };
-};
+  return {
+    category: normalizedCategory,
+    keys: keys as Record<TName, string>,
+    labelMap,
+    entries: entries as KeywordEntry<TName>[],
+    map,
+  };
+}
 
 /**
  * 여러 enum 그룹을 하나의 매핑 테이블로 자동 조립
