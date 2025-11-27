@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { enumToDefinitions } from "../src/core/prefixEnum.js";
 
-// TypeScript enum 정의
 enum StringEnum {
   TRYING_TO_QUIT = "TRYING_TO_QUIT",
   NEVER = "NEVER",
@@ -54,12 +53,10 @@ describe("enumToDefinitions", () => {
   it("숫자 enum의 역방향 매핑을 제외한다", () => {
     const result = enumToDefinitions(NumericEnum);
 
-    // 숫자 키(0, 1, 2)는 제외되어야 함
     expect(result["0"]).toBeUndefined();
     expect(result["1"]).toBeUndefined();
     expect(result["2"]).toBeUndefined();
 
-    // 문자열 키만 포함되어야 함
     expect(result["ACTIVE"]).toBe("0");
     expect(result["INACTIVE"]).toBe("1");
     expect(result["PENDING"]).toBe("2");

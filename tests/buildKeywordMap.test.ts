@@ -108,12 +108,8 @@ describe("buildKeywordMap", () => {
         role: RoleEnum1,
         role2: RoleEnum2,
       });
-      // role과 role2가 같은 카테고리명으로 정규화되면 중복 발생
-      // 하지만 실제로는 다른 카테고리명이므로 다른 키가 생성됨
-      // 실제 중복은 같은 카테고리에서 같은 값이 있을 때 발생
     }).not.toThrow();
 
-    // 실제 중복 케이스: 같은 카테고리로 두 번 prefixEnum 호출 후 병합
     const result1 = prefixEnum("role", RoleEnum1);
     const result2 = prefixEnum("role", RoleEnum2);
 
@@ -124,9 +120,7 @@ describe("buildKeywordMap", () => {
 
   it("enumGroups 객체에 options를 전달할 수 있다", () => {
     const TestEnum = {
-      test_key: {
-        // 라벨을 명시하지 않아 formatLabel이 사용됨
-      },
+      test_key: {},
     };
 
     const map = buildKeywordMap(
@@ -150,10 +144,8 @@ describe("buildKeywordMap", () => {
       item2: "Item 2",
     });
 
-    // 배열 형태
     const map1 = buildKeywordMap([enum1, enum2]);
 
-    // 객체 형태
     const map2 = buildKeywordMap({
       category1: { item1: "Item 1" },
       category2: { item2: "Item 2" },
@@ -182,7 +174,6 @@ describe("buildKeywordMap", () => {
         DRINKING: DrinkingEnum,
       });
 
-      // enum 값이 라벨로 사용됨
       expect(map["SMOKING_TRYING_TO_QUIT"]?.label).toBe("TRYING_TO_QUIT");
       expect(map["SMOKING_NEVER"]?.label).toBe("NEVER");
       expect(map["DRINKING_TRYING_TO_QUIT"]?.label).toBe("TRYING_TO_QUIT");
@@ -199,7 +190,6 @@ describe("buildKeywordMap", () => {
         },
       });
 
-      // enum 값이 라벨로 사용됨
       expect(map["SMOKING_TRYING_TO_QUIT"]?.label).toBe("TRYING_TO_QUIT");
       expect(map["STATUS_ACTIVE"]?.label).toBe("Active");
       expect(map["STATUS_INACTIVE"]?.label).toBe("Inactive");

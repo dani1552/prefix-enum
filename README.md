@@ -192,5 +192,5 @@ prefix-enum/
 ISC License
 Copyright (c)
 
-GitHub Repository: [https://github.com/dani1552/prefix-enum](https://github.com/dani1552/prefix-enum)
-Issues: [https://github.com/dani1552/prefix-enum/issues](https://github.com/dani1552/prefix-enum/issues)
+GitHub Repository: [https://github.com/dani1552/prefix-enum](https://github.com/dani1552/prefix-enum) <br />
+Issues: [https://github.com/dani1552/prefix-enum/issues](https://github.com/dani1552/prefix-enum/issues) <br />

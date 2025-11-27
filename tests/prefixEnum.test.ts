@@ -22,7 +22,7 @@ describe("prefixEnum", () => {
           value: "admin",
         },
         admin2: {
-          value: "admin", // 같은 값으로 중복
+          value: "admin",
         },
       });
     }).toThrow("Duplicated keyword key detected: USER_ROLE_ADMIN");
@@ -57,7 +57,7 @@ describe("prefixEnum", () => {
 
   it("라벨이 없으면 기본 포맷을 사용한다", () => {
     const result = prefixEnum("status", {
-      pending: {}, // 라벨 없음
+      pending: {},
     });
 
     expect(result.map["STATUS_PENDING"]?.label).toBe("Pending");
@@ -67,7 +67,7 @@ describe("prefixEnum", () => {
     const result = prefixEnum(
       "status",
       {
-        pending: {}, // 라벨 없음
+        pending: {},
       },
       {
         formatLabel: (value) => `Custom ${value}`,
@@ -120,7 +120,6 @@ describe("prefixEnum", () => {
       expect(result.keys.TRYING_TO_QUIT).toBe("SMOKING_TRYING_TO_QUIT");
       expect(result.keys.NEVER).toBe("SMOKING_NEVER");
       expect(result.keys.SOMETIMES).toBe("SMOKING_SOMETIMES");
-      // enum 값이 라벨로 사용됨
       expect(result.map["SMOKING_TRYING_TO_QUIT"]?.label).toBe("TRYING_TO_QUIT");
       expect(result.map["SMOKING_NEVER"]?.label).toBe("NEVER");
     });
@@ -132,7 +131,6 @@ describe("prefixEnum", () => {
       expect(result.keys.ACTIVE).toBe("STATUS_ACTIVE");
       expect(result.keys.INACTIVE).toBe("STATUS_INACTIVE");
       expect(result.keys.PENDING).toBe("STATUS_PENDING");
-      // enum 값이 라벨로 사용됨
       expect(result.map["STATUS_ACTIVE"]?.label).toBe("0");
       expect(result.map["STATUS_INACTIVE"]?.label).toBe("1");
     });
@@ -147,20 +145,14 @@ describe("prefixEnum", () => {
     });
 
     it("enum에서도 중복 키를 감지한다", () => {
-      // enum의 경우 키 이름을 value로 사용하므로, 같은 값이어도 키 이름이 다르면 다른 키가 됨
-      // 실제 중복은 같은 키 이름을 가진 경우에만 발생
       enum DuplicateEnum {
         SAME_KEY = "same_value",
-        SAME_KEY2 = "same_value", // 같은 값이지만 키 이름이 다름
+        SAME_KEY2 = "same_value",
       }
 
-      // 키 이름을 value로 사용하므로 SAME_KEY와 SAME_KEY2는 다른 키가 됨
       const result = prefixEnum("TEST", DuplicateEnum);
       expect(result.keys.SAME_KEY).toBe("TEST_SAME_KEY");
       expect(result.keys.SAME_KEY2).toBe("TEST_SAME_KEY2");
-
-      // 실제 중복은 같은 키 이름을 가진 경우에만 발생
-      // enum에서는 키 이름이 다르면 중복이 아님
     });
   });
 });
