@@ -187,6 +187,20 @@ prefix-enum/
 
 ---
 
+## CI & Testing
+
+- PR과 main/master push 시 `.github/workflows/ci.yml` GitHub Actions가 `pnpm lint`, `pnpm test`, `pnpm build`를 Node.js 18.x / 20.x 환경에서 자동으로 실행합니다.
+- 로컬에서도 동일한 품질 점검을 위해 아래 명령을 권장합니다.
+
+```bash
+pnpm install
+pnpm lint
+pnpm test
+pnpm build
+```
+
+---
+
 ## License
 
 ISC License
